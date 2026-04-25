@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Конверты"/>
+  <title>Конверты</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #130810; color: #f0dde6; font-family: Georgia, 'Times New Roman', serif; -webkit-tap-highlight-color: transparent; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #130810; }
+    ::-webkit-scrollbar-thumb { background: #5a2a40; border-radius: 2px; }
+    input { outline: none; font-family: -apple-system, Helvetica, Arial, sans-serif; -webkit-appearance: none; }
+    input::placeholder { color: #6a3a50; }
+    button { -webkit-tap-highlight-color: transparent; }
+    .glow { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); width: 400px; height: 200px; background: radial-gradient(ellipse, rgba(232,160,180,0.12) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+    .header { padding: 44px 20px 0; text-align: center; position: relative; z-index: 1; }
+    .header-label { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 4px; color: #6a3a50; text-transform: uppercase; margin-bottom: 6px; }
+    .header h1 { font-size: 36px; font-weight: 300; letter-spacing: 2px; color: #f0dde6; font-style: italic; }
+    .header-totals { margin-top: 10px; display: flex; justify-content: center; gap: 20px; font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 13px; color: #E8A0B4; }
+    .tabs { display: flex; border-bottom: 1px solid #2a1020; margin-top: 20px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { flex-shrink: 0; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #6a3a50; padding: 10px 14px; transition: color .2s; }
+    .tab-btn.active { color: #E8A0B4; border-bottom: 2px solid #E8A0B4; }
+    .content { padding: 20px 16px 100px; max-width: 480px; margin: 0 auto; position: relative; z-index: 1; }
+    .card { background: #1a0c16; border: 1px solid #3a1a2a; border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+    .card-title { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; letter-spacing: 3px; color: #6a3a50; text-transform: uppercase; margin-bottom: 14px; }
+    .env-card { background: #1a0c16; border: 1px solid #3a1a2a; border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+    .env-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .env-name { font-size: 22px; font-style: italic; }
+    .env-badge { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; color: #6a3a50; background: #2e1022; padding: 2px 8px; border-radius: 20px; }
+    .env-amounts { display: flex; gap: 24px; }
+    .env-cur-label { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; color: #6a3a50; margin-bottom: 2px; }
+    .env-amount { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 15px; color: #f0dde6; }
+    .total-card { background: linear-gradient(135deg, #1e0d18, #1a0c20); border: 1px solid #4a2040; border-radius: 10px; padding: 18px; text-align: center; }
+    .total-row { display: flex; justify-content: center; gap: 32px; margin-top: 10px; }
+    .total-amount { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 22px; color: #E8A0B4; }
+    .total-sub { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; color: #6a3a50; margin-top: 3px; }
+    .total-divider { width: 1px; background: #3a1a2a; }
+    .field-label { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; color: #6a3a50; margin-bottom: 6px; }
+    .field { margin-bottom: 14px; }
+    .input-field { background: #1e0e18; border: 1px solid #4a2035; border-radius: 6px; color: #f0dde6; padding: 11px 14px; font-size: 16px; width: 100%; transition: border .2s; }
+    .input-field:focus { border-color: #E8A0B4; }
+    .seg { display: flex; border: 1px solid #4a2035; border-radius: 6px; overflow: hidden; }
+    .seg-btn { flex: 1; background: none; border: none; cursor: pointer; font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 11px; letter-spacing: 1px; color: #6a3a50; padding: 10px 0; transition: all .2s; }
+    .seg-btn.active { background: #2e1022; color: #E8A0B4; }
+    .btn-pink { display: block; width: 100%; background: linear-gradient(135deg, #E8A0B4, #c8607c); border: none; border-radius: 6px; color: #fff; font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 14px 22px; cursor: pointer; margin-top: 4px; }
+    .btn-pink:active { opacity: .8; }
+    .preview-box { background: #200f1c; border: 1px solid #3a1a2a; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; }
+    .preview-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: baseline; }
+    .preview-env { font-style: italic; font-size: 16px; }
+    .preview-amt { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 13px; color: #f0dde6; }
+    .avail-box { background: #200f1c; border: 1px solid #3a1a2a; border-radius: 6px; padding: 8px 12px; margin-bottom: 14px; font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 12px; }
+    .avail-label { color: #6a3a50; margin-right: 4px; }
+    .ring-wrap { display: flex; align-items: center; gap: 16px; }
+    .ring-info { flex: 1; }
+    .ring-info-label { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; color: #6a3a50; margin-bottom: 3px; }
+    .ring-info-val { font-size: 18px; color: #E8A0B4; }
+    .ring-info-val2 { font-size: 15px; color: #E8A0B4; margin-top: 2px; }
+    .ring-info-remain { font-size: 14px; color: #9a6070; margin-top: 2px; }
+    .tx-card { background: #1a0c16; border: 1px solid #3a1a2a; border-radius: 10px; padding: 13px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .tx-type { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .tx-note { font-style: italic; font-size: 13px; color: #6a3a50; margin-top: 3px; }
+    .tx-splits { margin-top: 5px; font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; color: #6a3a50; }
+    .tx-amount { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 15px; text-align: right; }
+    .tx-date { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 10px; color: #4a2035; margin-top: 2px; text-align: right; }
+    .flash { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); border-radius: 8px; padding: 10px 20px; font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 12px; z-index: 999; white-space: nowrap; }
+    .flash.ok { background: #1a2a1a; border: 1px solid #4a8040; color: #80c870; }
+    .flash.err { background: #3d1020; border: 1px solid #c04060; color: #f08090; }
+    .goal-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .goal-field { flex: 1; }
+    .empty { text-align: center; color: #4a2035; font-style: italic; padding: 50px 0; font-size: 18px; }
+  </style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="header">
+  <div class="header-label">Мои накопления</div>
+  <h1>Конверты</h1>
+  <div class="header-totals">
+    <span id="total-usd">$0.00</span>
+    <span style="color:#3a1a2a">✦</span>
+    <span id="total-rub">0 ₽</span>
+  </div>
+</div>
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('overview')">Обзор</button>
+  <button class="tab-btn" onclick="switchTab('income')">Доход</button>
+  <button class="tab-btn" onclick="switchTab('expense')">Расход</button>
+  <button class="tab-btn" onclick="switchTab('travel')">✈ Цель</button>
+  <button class="tab-btn" onclick="switchTab('history')">История</button>
+</div>
+<div class="content">
+  <div id="tab-overview">
+    <div class="card-title">Балансы конвертов</div>
+    <div class="env-card" style="border-left:3px solid #E8A0B4">
+      <div class="env-card-header"><span class="env-name" style="color:#E8A0B4">✈ Путешествие</span><span class="env-badge">78%</span></div>
+      <div class="env-amounts"><div><div class="env-cur-label">USD</div><div class="env-amount" id="bal-travel-usd">$0.00</div></div><div><div class="env-cur-label">RUB</div><div class="env-amount" id="bal-travel-rub">0 ₽</div></div></div>
+    </div>
+    <div class="env-card" style="border-left:3px solid #D4A0C8">
+      <div class="env-card-header"><span class="env-name" style="color:#D4A0C8">✦ Личное</span><span class="env-badge">17%</span></div>
+      <div class="env-amounts"><div><div class="env-cur-label">USD</div><div class="env-amount" id="bal-personal-usd">$0.00</div></div><div><div class="env-cur-label">RUB</div><div class="env-amount" id="bal-personal-rub">0 ₽</div></div></div>
+    </div>
+    <div class="env-card" style="border-left:3px solid #F0B8C8">
+      <div class="env-card-header"><span class="env-name" style="color:#F0B8C8">♡ Подарки</span><span class="env-badge">5%</span></div>
+      <div class="env-amounts"><div><div class="env-cur-label">USD</div><div class="env-amount" id="bal-gifts-usd">$0.00</div></div><div><div class="env-cur-label">RUB</div><div class="env-amount" id="bal-gifts-rub">0 ₽</div></div></div>
+    </div>
+    <div class="total-card">
+      <div class="card-title" style="margin-bottom:4px">Всего</div>
+      <div class="total-row">
+        <div><div class="total-amount" id="ov-total-usd">$0.00</div><div class="total-sub">долларов</div></div>
+        <div class="total-divider"></div>
+        <div><div class="total-amount" id="ov-total-rub">0 ₽</div><div class="total-sub">рублей</div></div>
+      </div>
+    </div>
+  </div>
+  <div id="tab-income" style="display:none">
+    <div class="card">
+      <div class="card-title">Добавить доход</div>
+      <div class="field"><div class="field-label">Сумма</div><input class="input-field" type="number" id="income-amt" placeholder="0.00" oninput="updatePreview()"/></div>
+      <div class="field">
+        <div class="field-label">Валюта</div>
+        <div class="seg"><button class="seg-btn active" id="inc-usd" onclick="setIncomeCur('usd')">$ USD</button><button class="seg-btn" id="inc-rub" onclick="setIncomeCur('rub')">₽ RUB</button></div>
+      </div>
+      <div id="income-preview" style="display:none" class="preview-box">
+        <div class="card-title" style="margin-bottom:10px">Распределение</div>
+        <div class="preview-row"><span class="preview-env" style="color:#E8A0B4">✈ Путешествие</span><span class="preview-amt" id="prev-travel"></span></div>
+        <div class="preview-row"><span class="preview-env" style="color:#D4A0C8">✦ Личное</span><span class="preview-amt" id="prev-personal"></span></div>
+        <div class="preview-row"><span class="preview-env" style="color:#F0B8C8">♡ Подарки</span><span class="preview-amt" id="prev-gifts"></span></div>
+      </div>
+      <button class="btn-pink" onclick="addIncome()">Добавить</button>
+    </div>
+  </div>
+  <div id="tab-expense" style="display:none">
+    <div class="card">
+      <div class="card-title">Записать расход</div>
+      <div class="field">
+        <div class="field-label">Из конверта</div>
+        <div class="seg"><button class="seg-btn active" id="exp-env-travel" onclick="setExpEnv('travel')">✈ Поездка</button><button class="seg-btn" id="exp-env-personal" onclick="setExpEnv('personal')">✦ Личное</button><button class="seg-btn" id="exp-env-gifts" onclick="setExpEnv('gifts')">♡ Подарки</button></div>
+      </div>
+      <div class="avail-box"><span class="avail-label">Доступно:</span><span id="exp-avail" style="color:#E8A0B4"></span></div>
+      <div class="field">
+        <div class="field-label">Валюта</div>
+        <div class="seg"><button class="seg-btn active" id="exp-usd" onclick="setExpCur('usd')">$ USD</button><button class="seg-btn" id="exp-rub" onclick="setExpCur('rub')">₽ RUB</button></div>
+      </div>
+      <div class="field"><div class="field-label">Сумма</div><input class="input-field" type="number" id="exp-amt" placeholder="0.00"/></div>
+      <div class="field" style="margin-bottom:4px"><div class="field-label">Заметка (необязательно)</div><input class="input-field" type="text" id="exp-note" placeholder="На что потратила..."/></div>
+      <button class="btn-pink" onclick="addExpense()">Записать расход</button>
+    </div>
+  </div>
+  <div id="tab-travel" style="display:none">
+    <div class="card" style="border-left:3px solid #E8A0B4">
+      <div class="card-title">✈ Путешествие</div>
+      <div class="ring-wrap">
+        <svg width="170" height="170" viewBox="0 0 200 200">
+          <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F0B8CC"/><stop offset="100%" stop-color="#C860A0"/></linearGradient></defs>
+          <circle cx="100" cy="100" r="78" fill="none" stroke="#2e1022" stroke-width="16"/>
+          <circle id="ring-arc" cx="100" cy="100" r="78" fill="none" stroke="url(#ringGrad)" stroke-width="16" stroke-dasharray="490.09" stroke-dashoffset="490.09" stroke-linecap="round" transform="rotate(-90 100 100)" style="transition:stroke-dashoffset 0.6s ease"/>
+          <text id="ring-pct" x="100" y="88" text-anchor="middle" dominant-baseline="middle" fill="#f0dde6" font-size="28" font-family="Georgia,serif" font-style="italic">0%</text>
+          <text id="ring-label" x="100" y="116" text-anchor="middle" dominant-baseline="middle" fill="#6a3a50" font-size="10" font-family="Helvetica,Arial,sans-serif">цель не задана</text>
+        </svg>
+        <div class="ring-info">
+          <div class="ring-info-label">Накоплено</div>
+          <div class="ring-info-val" id="travel-saved-usd">$0.00</div>
+          <div class="ring-info-val2" id="travel-saved-rub">0 ₽</div>
+          <div style="margin-top:14px">
+            <div class="ring-info-label" id="remain-label" style="display:none">Осталось</div>
+            <div class="ring-info-remain" id="travel-remain-usd"></div>
+            <div class="ring-info-remain" id="travel-remain-rub"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Задать цель</div>
+      <div class="goal-row">
+        <div class="goal-field"><div class="field-label">$ USD</div><input class="input-field" type="number" id="goal-usd" placeholder="0" oninput="updateRing()"/></div>
+        <div class="goal-field"><div class="field-label">₽ RUB</div><input class="input-field" type="number" id="goal-rub" placeholder="0" oninput="updateRing()"/></div>
+      </div>
+      <button class="btn-pink" onclick="saveGoal()">Сохранить цель</button>
+    </div>
+  </div>
+  <div id="tab-history" style="display:none">
+    <div class="card-title">История операций</div>
+    <div id="history-list"></div>
+  </div>
+</div>
+<div id="flash" class="flash ok" style="display:none"></div>
+<script>
+// 78% путешествие, 17% личное, 5% подарки (итого 100%)
+const ENVS=[{id:'travel',label:'✈ Путешествие',color:'#E8A0B4',pct:.78},{id:'personal',label:'✦ Личное',color:'#D4A0C8',pct:.17},{id:'gifts',label:'♡ Подарки',color:'#F0B8C8',pct:.05}];
+const KEY='sofi_envelopes_v2';
+function loadState(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s);}catch{}return{balances:{travel:{usd:0,rub:0},personal:{usd:0,rub:0},gifts:{usd:0,rub:0}},transactions:[],travelGoal:{usd:0,rub:0}};}
+function saveState(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch{}}
+let state=loadState(),incomeCur='usd',expEnv='travel',expCur='usd';
+const fU=n=>'$'+Math.abs(n).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fR=n=>Math.abs(n).toLocaleString('ru')+' ₽';
+const fmt=(n,c)=>c==='usd'?fU(n):fR(n);
+const envLabel=id=>ENVS.find(e=>e.id===id)?.label||id;
+function total(c){return ENVS.reduce((s,e)=>s+state.balances[e.id][c],0);}
+function render(){
+  document.getElementById('total-usd').textContent=fU(total('usd'));
+  document.getElementById('total-rub').textContent=fR(total('rub'));
+  ENVS.forEach(e=>{document.getElementById('bal-'+e.id+'-usd').textContent=fU(state.balances[e.id].usd);document.getElementById('bal-'+e.id+'-rub').textContent=fR(state.balances[e.id].rub);});
+  document.getElementById('ov-total-usd').textContent=fU(total('usd'));
+  document.getElementById('ov-total-rub').textContent=fR(total('rub'));
+  updateExpAvail();updateRing();renderHistory();
+}
+function updateExpAvail(){const b=state.balances[expEnv];const el=document.getElementById('exp-avail');el.textContent=fU(b.usd)+' · '+fR(b.rub);el.style.color=ENVS.find(e=>e.id===expEnv).color;}
+function updateRing(){
+  const bal=state.balances.travel;
+  const gU=parseFloat(document.getElementById('goal-usd').value)||state.travelGoal.usd||0;
+  const gR=parseFloat(document.getElementById('goal-rub').value)||state.travelGoal.rub||0;
+  const hasGoal=gU>0||gR>0;
+  const pct=hasGoal?Math.min((bal.usd+bal.rub/90)/(gU+gR/90),1):0;
+  const circ=2*Math.PI*78;
+  document.getElementById('ring-arc').setAttribute('stroke-dashoffset',circ*(1-pct));
+  document.getElementById('ring-pct').textContent=Math.round(pct*100)+'%';
+  document.getElementById('ring-label').textContent=hasGoal?'накоплено':'цель не задана';
+  document.getElementById('travel-saved-usd').textContent=fU(bal.usd);
+  document.getElementById('travel-saved-rub').textContent=fR(bal.rub);
+  const rl=document.getElementById('remain-label');
+  if(hasGoal){rl.style.display='block';document.getElementById('travel-remain-usd').textContent=fU(Math.max(0,gU-bal.usd));document.getElementById('travel-remain-rub').textContent=fR(Math.max(0,gR-bal.rub));}
+  else{rl.style.display='none';document.getElementById('travel-remain-usd').textContent='';document.getElementById('travel-remain-rub').textContent='';}
+}
+function renderHistory(){
+  const list=document.getElementById('history-list');
+  if(!state.transactions.length){list.innerHTML='<div class="empty">Операций пока нет ♡</div>';return;}
+  list.innerHTML=state.transactions.map(tx=>{
+    const inc=tx.type==='income';
+    const bc=inc?'#60a840':'#c04060',tc=inc?'#60b840':'#e05070',ac=inc?'#80d860':'#f07080';
+    const tl=inc?'+ Доход':'- '+envLabel(tx.env);
+    const al=(inc?'+':'-')+fmt(tx.amount,tx.currency);
+    const note=tx.note?`<div class="tx-note">${tx.note}</div>`:'';
+    const splits=inc&&tx.splits?'<div class="tx-splits">'+tx.splits.map(s=>{const e=ENVS.find(ev=>ev.id===s.env);return`<span style="margin-right:10px">${e?e.label.split(' ')[0]:''} ${fmt(s.amount,tx.currency)}</span>`;}).join('')+'</div>':'';
+    return`<div class="tx-card" style="border-left:2px solid ${bc}"><div><span class="tx-type" style="color:${tc}">${tl}</span>${note}${splits}</div><div><div class="tx-amount" style="color:${ac}">${al}</div><div class="tx-date">${tx.date}</div></div></div>`;
+  }).join('');
+}
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['overview','income','expense','travel','history'][i]===tab));
+  ['overview','income','expense','travel','history'].forEach(t=>document.getElementById('tab-'+t).style.display=t===tab?'block':'none');
+  if(tab==='travel')updateRing();
+}
+function setIncomeCur(c){incomeCur=c;document.getElementById('inc-usd').classList.toggle('active',c==='usd');document.getElementById('inc-rub').classList.toggle('active',c==='rub');updatePreview();}
+function setExpEnv(e){expEnv=e;['travel','personal','gifts'].forEach(x=>document.getElementById('exp-env-'+x).classList.toggle('active',x===e));updateExpAvail();}
+function setExpCur(c){expCur=c;document.getElementById('exp-usd').classList.toggle('active',c==='usd');document.getElementById('exp-rub').classList.toggle('active',c==='rub');}
+function updatePreview(){const amt=parseFloat(document.getElementById('income-amt').value);const box=document.getElementById('income-preview');if(!amt||amt<=0){box.style.display='none';return;}box.style.display='block';ENVS.forEach(e=>document.getElementById('prev-'+e.id).textContent=fmt(amt*e.pct,incomeCur));}
+function showFlash(msg,type){const el=document.getElementById('flash');el.textContent=msg;el.className='flash '+(type||'ok');el.style.display='block';setTimeout(()=>el.style.display='none',2500);}
+function addIncome(){
+  const amt=parseFloat(document.getElementById('income-amt').value);
+  if(!amt||amt<=0)return showFlash('Введи сумму больше 0','err');
+  const splits=[];
+  ENVS.forEach(e=>{const s=Math.round(amt*e.pct*100)/100;state.balances[e.id][incomeCur]+=s;splits.push({env:e.id,amount:s});});
+  state.transactions.unshift({type:'income',amount:amt,currency:incomeCur,splits,date:new Date().toLocaleDateString('ru')});
+  saveState();render();document.getElementById('income-amt').value='';document.getElementById('income-preview').style.display='none';
+  showFlash('+'+fmt(amt,incomeCur)+' распределено');
+}
+function addExpense(){
+  const amt=parseFloat(document.getElementById('exp-amt').value);
+  if(!amt||amt<=0)return showFlash('Введи сумму больше 0','err');
+  if(amt>state.balances[expEnv][expCur])return showFlash('Недостаточно средств','err');
+  const note=document.getElementById('exp-note').value;
+  state.balances[expEnv][expCur]-=amt;
+  state.transactions.unshift({type:'expense',amount:amt,currency:expCur,env:expEnv,note,date:new Date().toLocaleDateString('ru')});
+  saveState();render();document.getElementById('exp-amt').value='';document.getElementById('exp-note').value='';
+  showFlash('-'+fmt(amt,expCur)+' из '+envLabel(expEnv));
+}
+function saveGoal(){
+  state.travelGoal={usd:parseFloat(document.getElementById('goal-usd').value)||0,rub:parseFloat(document.getElementById('goal-rub').value)||0};
+  saveState();updateRing();showFlash('Цель сохранена');
+}
+document.getElementById('goal-usd').value=state.travelGoal.usd||'';
+document.getElementById('goal-rub').value=state.travelGoal.rub||'';
+render();
+</script>
+</body>
+</html>
